@@ -349,7 +349,7 @@
                           inTree:(BinaryTreeNode *)rootNode{
     if (!nodeA || !nodeB || !rootNode) return nil;
     if (nodeA == nodeB) return nodeA;
-
+    
     NSArray *pathA = [self pathOfTreeNode:nodeA inTree:rootNode];//     根节点到节点B的路径
     NSArray *pathB = [self pathOfTreeNode:nodeB inTree:rootNode];//     根节点到节点A的路径
     if (pathA.count == 0 || pathA.count == 0) return nil; // 其中一个节点不在树中，则没有公共父节点
@@ -389,7 +389,7 @@
     for (NSInteger i = pathA.count - 1; i >= 0; i--) { // 由于获取的路径是栈，所以从后往前推，查找第一个出现的公共节点
         [path addObject:[path objectAtIndex:i]];
         for (NSInteger j = pathB.count - 1; j >= 0; j--) {
-//            找到公共父节点，则将pathB中后面的节点压进path
+            //            找到公共父节点，则将pathB中后面的节点压进path
             if ([pathA objectAtIndex:i] == [pathB objectAtIndex:j]) {
                 j++; // 避免重复添加公共父节点
                 while (j < pathB.count) {
@@ -423,7 +423,7 @@
     for (NSInteger i = pathA.count - 1; i >= 0; i--) { // 由于获取的路径是栈，所以从后往前推，查找第一个出现的公共节点
         for (NSInteger j = pathB.count - 1; j >= 0; j--) {
             if ([pathA objectAtIndex:i] == [pathB objectAtIndex:j]) {
-//             距离 = 路径节点数 - 1(这里-2是因为这里有一个公共父节点)
+                //             距离 = 路径节点数 - 1(这里-2是因为这里有一个公共父节点)
                 return (pathA.count - i) + (pathB.count - j) - 2;
             }
         }
@@ -478,12 +478,12 @@
     if (!rootNode.leftNode && rootNode.rightNode) {
         return NO;
     }
-//    按层次遍历节点，找到满足完全二叉树的条件：
-//      1 如果某个节点的右子树不为空，则他的左子树必须不为空
-//      2 如果某个节点的右子树为空，则排在他后面的节点的孩子节点必须为空
-//    排在该节点后面的节点有两种
-//      1 同层次后面的节点
-//      2 同层次的前面的节点的孩子节点（因为在遍历节点的时候会把节点从队列里面pop，并且将其子节点push进队列）
+    //    按层次遍历节点，找到满足完全二叉树的条件：
+    //      1 如果某个节点的右子树不为空，则他的左子树必须不为空
+    //      2 如果某个节点的右子树为空，则排在他后面的节点的孩子节点必须为空
+    //    排在该节点后面的节点有两种
+    //      1 同层次后面的节点
+    //      2 同层次的前面的节点的孩子节点（因为在遍历节点的时候会把节点从队列里面pop，并且将其子节点push进队列）
     NSMutableArray *nodes = [NSMutableArray array];
     [nodes addObject:rootNode];
     BOOL isComplete = NO;
@@ -503,7 +503,7 @@
             isComplete = YES;
         }
         
-//        打进队列
+        //        打进队列
         if (node.leftNode) {
             [nodes addObject:node.leftNode];
         }
@@ -570,6 +570,35 @@ static NSInteger height;
     }
     return NO;
     
+}
+
+/**
+ *  重建二叉树
+ *  先序遍历的第一个元素是根节点，根节点左右的为左右子树
+ *
+ *  @return
+ */
++ (BinaryTreeNode *)reCreateTreeWithPre:(NSArray<NSNumber *> *)preA
+                                 center:(NSArray<NSNumber *> *)cenA{
+    if (preA == nil || cenA == nil || preA.count != cenA.count) {
+        return nil;
+    }
+    
+    NSNumber *root_node = preA[0]; // 先序序遍历的第一个数字就是根节点
+    BinaryTreeNode *node = [[BinaryTreeNode alloc] init];
+    
+    for (int i = 0; i < cenA.count; i++) { //
+        if (root_node == cenA[i]) {
+            if (i > 0) { // 排除边界情况 一个根节点
+                node.leftNode = [self reCreateTreeWithPre:[preA subarrayWithRange:NSMakeRange(1, i + i)] center:[cenA subarrayWithRange:NSMakeRange(0, i)]];
+            }
+            if (i < cenA.count + 1){ // 排除边界情况只有一个左右子树,中序遍历的的i是某一个根节点，所以要i + 1
+                node.rightNode = [self reCreateTreeWithPre:[preA subarrayWithRange:NSMakeRange(i + 1, preA.count)] center:[cenA subarrayWithRange:NSMakeRange(i + 1, cenA.count)]];
+            }
+            return node;
+        }
+    }
+    return nil;
 }
 
 @end
